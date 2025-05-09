@@ -12,12 +12,14 @@ VENTANA = pygame.display.set_mode((ANCHO, ALTO))
 pygame.display.set_caption("Lleva a Mimi al hormiguero")
 
 # Colores
+marron_claro = (222, 184, 135)
 marrón = (205, 133, 63)
 VERDE = (0, 200, 0)
 NEGRO = (0, 0, 0)
 
+
 # Fuente
-fuente = pygame.font.SysFont(None, 48)
+fuente = pygame.font.SysFont(None, 40)
 
 # Reloj
 clock = pygame.time.Clock()
@@ -27,15 +29,15 @@ FPS = 60
 hormi_x = 50
 hormi_y = 300
 hormi_vel = 0
-GRAVEDAD = 0.3      # ↓ Menor gravedad
-SALTO = -6          # ↑ Salto más suave
+GRAVEDAD = 0.3
+SALTO = -6
 radio_hormi = 15
 
 # Tubos
 tubos = []
-espacio_tubos = 200       # ↑ Más espacio entre tubos
+espacio_tubos = 200
 ancho_tubo = 70
-vel_tubos = 4       # ← Más lentos
+vel_tubos = 4
 
 # Puntaje
 puntos = 0
@@ -56,12 +58,31 @@ def colision(hormi_y, tubos):
             return True
     return hormi_y + radio_hormi > ALTO or hormi_y - radio_hormi < 0
 
-# Bucle principal
+def mostrar_splash_screen():
+    VENTANA.fill(marron_claro)
+    dibujar_texto("Lleva a Mimi a el hormiguero", 10, 200)
+    dibujar_texto("¡Buena suerte!", 100, 300)
+    dibujar_texto("Presiona una tecla", 60, 400)
+    dibujar_texto("para que inicie el juego...", 60, 440)
+    pygame.display.update()
+
+    esperando = True
+    while esperando:
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if evento.type == pygame.KEYDOWN:
+                esperando = False
+
+# Mostrar splash screen antes del juego
+mostrar_splash_screen()
+
+# Bucle principal del juego
 while True:
     clock.tick(FPS)
     VENTANA.fill(marrón)
 
-    # Eventos
     for evento in pygame.event.get():
         if evento.type == pygame.QUIT:
             pygame.quit()
@@ -70,15 +91,12 @@ while True:
             if evento.key == pygame.K_SPACE:
                 hormi_vel = SALTO
 
-    # Movimiento del pájaro
     hormi_vel += GRAVEDAD
     hormi_y += hormi_vel
 
-    # Generar tubos
-    if not tubos or tubos[-1]['x'] < ANCHO - 250:  # ← Más espacio horizontal
+    if not tubos or tubos[-1]['x'] < ANCHO - 250:
         tubos.append(crear_tubo())
 
-    # Mover y dibujar tubos
     nuevos_tubos = []
     for tubo in tubos:
         tubo['x'] -= vel_tubos
@@ -91,19 +109,15 @@ while True:
 
     tubos = nuevos_tubos
 
-    # Dibujar pájaro
     pygame.draw.circle(VENTANA, NEGRO, (hormi_x, int(hormi_y)), radio_hormi)
 
-    # Colisión
     if colision(hormi_y, tubos):
-        dibujar_texto("Game Over", 100, 250)   
+        dibujar_texto("Game Over", 100, 250)
         pygame.display.update()
         pygame.time.wait(2000)
         pygame.quit()
         sys.exit()
 
-    # Mostrar puntaje
     dibujar_texto(str(puntos), 10, 10)
 
-    # Actualizar pantalla
     pygame.display.update()
